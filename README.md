@@ -10,7 +10,7 @@ Web: https://soluciones-carabanchel.github.io
 
 | Herramienta | Para qué sirve | Estado |
 | --- | --- | --- |
-| Generador de cajas con pestañas | Introduces las medidas y el grosor del material y descargas el despiece listo para corte láser | En preparación |
+| [Generador de cajas con pestañas](https://soluciones-carabanchel.github.io/cajas/) | Introduces las medidas y el grosor del material y descargas el despiece listo para corte láser | Primera versión |
 
 ## Principios
 
