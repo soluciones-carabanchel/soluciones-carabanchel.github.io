@@ -2,7 +2,7 @@
 
 Herramientas libres para diseñadores de barrio.
 
-Una colección de pequeñas aplicaciones que funcionan directamente en el navegador, pensadas para resolver problemas habituales de taller: cortar, grabar, imprimir y construir. Nacen de la experiencia de un FabLab de escuela de diseño, pero están abiertas a cualquier maker.
+Una colección de pequeñas aplicaciones que funcionan directamente en el navegador, pensadas para resolver problemas habituales de taller: cortar, grabar, imprimir y construir. Nacen de la experiencia de un FabLab de escuela de diseño, pero están abiertas a cualquiera.
 
 Web: https://soluciones-carabanchel.github.io
 
