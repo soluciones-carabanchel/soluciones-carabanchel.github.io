@@ -1,17 +1,14 @@
 import { piezasCaja, validar, colocar, tramos } from './geometria.js';
+import { construirDibujo, aSVG, aDXF } from './exportar.js';
 
 const MAQUINAS = {
   trotec: { nombre: 'Trotec Speedy 100', ancho: 600, alto: 300 },
   widlaser: { nombre: 'Widlaser 900', ancho: 1200, alto: 800 },
 };
 
-// Colores de capa de las plantillas del FabLab (RGB puros).
-const COLOR = { corte: '#00FF00', grabado: '#FF0000', marco: '#FF00FF' };
-
 const $ = (id) => document.getElementById(id);
 const form = $('formulario');
 const fmt = (n, d = 1) => Number(n.toFixed(d)).toLocaleString('es-ES');
-const num = (n) => Number(n.toFixed(3));
 
 function leer() {
   const f = new FormData(form);
@@ -27,46 +24,9 @@ function leer() {
   };
 }
 
-/** Construye el SVG (en mm) con capas por color. */
-function construirSVG(cfg, disposicion) {
-  const W = Math.max(cfg.plancha.ancho, disposicion.ancho);
-  const H = Math.max(cfg.plancha.alto, disposicion.alto);
-  const cortes = [];
-  const textos = [];
-  for (const { pieza: p, x, y, girada } of disposicion.colocadas) {
-    const tr = girada
-      ? ([px, py]) => [x + py, y + px]
-      : ([px, py]) => [x + px, y + (p.h - py)];
-    const d = p.contorno.map((pt, i) => {
-      const [X, Y] = tr(pt);
-      return `${i ? 'L' : 'M'}${num(X)} ${num(Y)}`;
-    }).join('') + 'Z';
-    cortes.push(`<path d="${d}"/>`);
-    if (cfg.etiquetas) {
-      const w = girada ? p.h : p.w;
-      const h = girada ? p.w : p.h;
-      const tam = Math.max(3, Math.min(8, h / 7, w / (p.nombre.length * 0.75)));
-      textos.push(`<text x="${num(x + w / 2)}" y="${num(y + h / 2 + tam * 0.35)}" font-size="${num(tam)}">${p.nombre}</text>`);
-    }
-  }
-  const trazo = 0.01; // línea fina (hairline) para que el láser la trate como vector
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${num(W)}mm" height="${num(H)}mm" viewBox="0 0 ${num(W)} ${num(H)}">
-  <title>Caja ${cfg.ancho}×${cfg.fondo}×${cfg.alto} mm, grosor ${cfg.grosor} mm, kerf ${cfg.kerf} mm</title>
-  <g id="marco" class="marco" fill="none" stroke="${COLOR.marco}" stroke-width="${trazo}">
-    <rect x="0" y="0" width="${num(cfg.plancha.ancho)}" height="${num(cfg.plancha.alto)}"/>
-  </g>
-  <g id="grabado-vectorial" class="grabado" fill="none" stroke="${COLOR.grabado}" stroke-width="${trazo}" font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
-    ${textos.join('\n    ')}
-  </g>
-  <g id="corte-exterior" class="corte" fill="none" stroke="${COLOR.corte}" stroke-width="${trazo}" stroke-linejoin="miter">
-    ${cortes.join('\n    ')}
-  </g>
-</svg>`;
-}
-
 let ultimoSVG = '';
-let ultimoNombre = 'caja.svg';
+let ultimoDXF = '';
+let ultimoNombre = 'caja';
 
 function actualizar() {
   const cfg = leer();
@@ -87,6 +47,7 @@ function actualizar() {
     lienzo.innerHTML = '';
     tabla.innerHTML = '';
     boton.disabled = true;
+    $('descargarDXF').disabled = true;
     return;
   }
 
@@ -108,10 +69,13 @@ function actualizar() {
     <div class="dato"><b>${interior.map((v) => fmt(v)).join(' × ')}</b><span>interior útil (mm)</span></div>
     <div class="dato"><b>${piezas.length}</b><span>piezas</span></div>`;
 
-  ultimoSVG = construirSVG(cfg, disposicion);
-  ultimoNombre = `caja_${cfg.ancho}x${cfg.fondo}x${cfg.alto}_e${cfg.grosor}${cfg.tapa ? '' : '_abierta'}.svg`.replace(/,/g, '.');
+  const dibujo = construirDibujo(cfg, disposicion);
+  ultimoSVG = aSVG(dibujo, `Caja ${cfg.ancho}×${cfg.fondo}×${cfg.alto} mm, grosor ${cfg.grosor} mm, kerf ${cfg.kerf} mm`);
+  ultimoDXF = aDXF(dibujo);
+  ultimoNombre = `caja_${cfg.ancho}x${cfg.fondo}x${cfg.alto}_e${cfg.grosor}${cfg.tapa ? '' : '_abierta'}`.replace(/,/g, '.');
   lienzo.innerHTML = ultimoSVG.replace(/^<\?xml[^>]*>\s*/, '');
   boton.disabled = false;
+  $('descargarDXF').disabled = false;
 
   const pest = (L) => {
     const n = tramos(L, cfg.pestana);
@@ -129,16 +93,19 @@ function actualizar() {
     </td></tr></tfoot>`;
 }
 
-$('descargar').addEventListener('click', () => {
-  const blob = new Blob([ultimoSVG], { type: 'image/svg+xml' });
+function descargar(contenido, tipo, extension) {
+  const blob = new Blob([contenido], { type: tipo });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = ultimoNombre;
+  a.download = `${ultimoNombre}.${extension}`;
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-});
+}
+
+$('descargar').addEventListener('click', () => descargar(ultimoSVG, 'image/svg+xml', 'svg'));
+$('descargarDXF').addEventListener('click', () => descargar(ultimoDXF, 'application/dxf', 'dxf'));
 
 form.addEventListener('input', actualizar);
 form.addEventListener('change', actualizar);
