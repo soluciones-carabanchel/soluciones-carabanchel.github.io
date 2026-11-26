@@ -82,7 +82,7 @@
   <main class="envoltorio">
     <section class="intro">
       <h1>Cajas con pestañas</h1>
-      <p>Indica las medidas <strong>exteriores</strong> de la caja y el grosor del material. La herramienta calcula las pestañas, coloca las piezas en la plancha y te da un SVG listo para abrir en Illustrator y mandar al láser.</p>
+      <p>Indica las medidas <strong>exteriores</strong> de la caja y el grosor del material. La herramienta calcula las pestañas, coloca las piezas en la plancha y te da un SVG o un DXF listo para mandar al láser.</p>
     </section>
 
     <div class="app">
@@ -142,6 +142,7 @@
         </div>
         <div class="acciones">
           <button class="boton" id="descargar" type="button">Descargar SVG</button>
+          <button class="boton secundario" id="descargarDXF" type="button">Descargar DXF</button>
         </div>
         <table id="tabla"></table>
       </section>
@@ -150,7 +151,8 @@
     <details>
       <summary>Cómo usar el archivo en el FabLab</summary>
       <ul>
-        <li>Abre el SVG en Illustrator: se abre a escala real (mm) y con capas separadas por color, según las plantillas del FabLab.</li>
+        <li><b>SVG</b>: ábrelo en Illustrator; se abre a escala real (mm) y con capas separadas por color, según las plantillas del FabLab.</li>
+        <li><b>DXF</b>: para Rhino, AutoCAD u otros programas. Trae tres capas (CORTE_EXTERIOR, GRABADO_VECTORIAL y MARCO) con su color asignado y las líneas en color «por capa». Está en milímetros: si el programa pregunta las unidades al importar, elige mm.</li>
         <li><b>Verde</b>: corte exterior. <b>Rojo</b>: grabado vectorial de los nombres (desactívalo si no lo quieres). <b>Magenta</b>: marco de la plancha, no se corta.</li>
         <li>Haz primero una prueba con una esquina para comprobar el ajuste y corrige el kerf si hace falta.</li>
         <li>Las medidas son exteriores: el hueco interior útil aparece arriba como «interior».</li>
