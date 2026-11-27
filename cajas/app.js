@@ -1,4 +1,5 @@
-import { piezasCaja, validar, colocar, tramos } from './geometria.js';
+import { piezasCaja, validar, tramos } from './geometria.js';
+import { colocar } from './nesting.js';
 import { construirDibujo, aSVG, aDXF } from './exportar.js';
 
 const MAQUINAS = {
@@ -18,6 +19,7 @@ function leer() {
   return {
     ancho: v('ancho'), fondo: v('fondo'), alto: v('alto'),
     grosor: v('grosor'), pestana: v('pestana'), kerf: v('kerf') || 0,
+    separacion: Math.max(0, v('separacion') || 0),
     tapa: f.get('tapa') === 'si',
     etiquetas: f.get('etiquetas') === 'on',
     maquina, plancha,
@@ -52,10 +54,13 @@ function actualizar() {
   }
 
   const piezas = piezasCaja(cfg);
-  const disposicion = colocar(piezas, cfg.plancha.ancho, cfg.plancha.alto);
+  const disposicion = colocar(piezas, cfg.plancha.ancho, cfg.plancha.alto, 5, Math.max(cfg.separacion, cfg.kerf));
   avisos.forEach((m) => mensajes.push(['aviso', m]));
   if (disposicion.cabe) {
-    mensajes.push(['ok', `Las ${piezas.length} piezas caben en una plancha de ${cfg.plancha.ancho} × ${cfg.plancha.alto} mm.`]);
+    const r = disposicion.retal;
+    const pct = Math.round(disposicion.aprovechamiento * 100);
+    mensajes.push(['ok', `Las ${piezas.length} piezas caben en una plancha de ${cfg.plancha.ancho} × ${cfg.plancha.alto} mm (ocupan el ${pct} % de la plancha).` +
+      (r && r.ancho > 20 && r.alto > 20 ? ` Queda libre un retal de ${fmt(r.ancho, 0)} × ${fmt(r.alto, 0)} mm.` : '')]);
   } else {
     const sugerencia = cfg.maquina === 'trotec' ? ' Prueba con la Widlaser 900 o divide el archivo en varias planchas.' : ' Divide el archivo en varias planchas.';
     mensajes.push(['error', `Las piezas ocupan ${fmt(disposicion.ancho, 0)} × ${fmt(disposicion.alto, 0)} mm y no caben en la plancha.${sugerencia}`]);

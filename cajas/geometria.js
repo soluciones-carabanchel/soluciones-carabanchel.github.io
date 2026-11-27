@@ -155,33 +155,3 @@ export function validar({ ancho, fondo, alto, grosor, pestana, kerf }) {
   }
   return { errores, avisos };
 }
-
-/**
- * Coloca las piezas en filas sobre una plancha (algoritmo de estantes sencillo).
- * Devuelve { colocadas: [{pieza, x, y, girada}], ancho, alto, cabe }.
- */
-export function colocar(piezas, planchaAncho, planchaAlto, margen = 5, separacion = 4) {
-  const orden = [...piezas].sort((a, b) => Math.max(b.w, b.h) - Math.max(a.w, a.h));
-  const colocadas = [];
-  let x = margen;
-  let y = margen;
-  let altoFila = 0;
-  let anchoUsado = 0;
-  for (const p of orden) {
-    // Preferimos la pieza tumbada (lado largo en horizontal) para filas más bajas.
-    let w = Math.max(p.w, p.h);
-    let h = Math.min(p.w, p.h);
-    const girada = p.h > p.w;
-    if (x + w > planchaAncho - margen && x > margen) {
-      x = margen;
-      y += altoFila + separacion;
-      altoFila = 0;
-    }
-    colocadas.push({ pieza: p, x, y, girada });
-    x += w + separacion;
-    altoFila = Math.max(altoFila, h);
-    anchoUsado = Math.max(anchoUsado, x - separacion + margen);
-  }
-  const altoUsado = y + altoFila + margen;
-  return { colocadas, ancho: anchoUsado, alto: altoUsado, cabe: anchoUsado <= planchaAncho && altoUsado <= planchaAlto };
-}
