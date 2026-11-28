@@ -63,3 +63,7 @@ Versión **r187 (0.187.0)**, licencia MIT (`vendor/three/LICENSE`). Son los arch
 | `addons/controls/OrbitControls.js` | `examples/jsm/controls/` |
 
 Para actualizar: descarga la nueva versión (`npm pack three@X.Y.Z`), sustituye esos mismos archivos, cambia el número de versión de este README y comprueba la página de prueba. Hazlo en una PR aparte. Solo hace falta cuando una herramienta necesite algo nuevo o haya un fallo que corregir.
+
+## Fuente de trazo único (`fuente-trazo.js`)
+
+Convierte un texto en polilíneas para grabarlo con el láser en una sola pasada, sin contorno (fuente Hershey Sans de un trazo, con tildes y eñe). `textoATrazos(texto, x, y, altura)` devuelve las líneas en mm con el texto centrado en `(x, y)`; `anchoTexto(texto, altura)` dice cuánto ocupa. La usa el generador de cajas para grabar el nombre de cada pieza en el SVG y en el DXF.

@@ -20,8 +20,8 @@
   <style>
     /* Solo lo propio de cajas: grosor de línea de cada capa en la vista previa */
     .lienzo .corte path { stroke-width: 1.4px; }
-    .lienzo .grabado text { stroke-width: 0.6px; }
-    .lienzo .marco rect { stroke-width: 1px; stroke-dasharray: 6 4; }
+    .lienzo .grabado path { stroke-width: 0.8px; }
+    .lienzo .marco rect { stroke-width: 1px; }
     .detalles { padding-top: 24px; }
   </style>
 </head>
@@ -63,8 +63,8 @@
           <fieldset>
             <legend>Caja</legend>
             <div class="opciones" role="radiogroup" aria-label="Tipo de caja">
-              <label><input type="radio" name="tapa" value="si" checked> Cerrada (con tapa)</label>
-              <label><input type="radio" name="tapa" value="no"> Abierta</label>
+              <label><input type="radio" name="tapa" value="no" checked> Abierta</label>
+              <label><input type="radio" name="tapa" value="si"> Cerrada (con tapa)</label>
             </div>
             <label class="check separado"><input type="checkbox" name="etiquetas" checked> Grabar el nombre de cada pieza</label>
           </fieldset>
@@ -107,7 +107,7 @@
           </div>
         </div>
         <div class="barra-descargas">
-          <button class="boton" id="descargar" type="button">↓ SVG</button>
+          <button class="boton secundario" id="descargar" type="button">↓ SVG</button>
           <button class="boton secundario" id="descargarDXF" type="button">↓ DXF</button>
           <div class="leyenda" id="leyenda">
             <span><i class="capa-corte-ext"></i>Corte exterior</span>

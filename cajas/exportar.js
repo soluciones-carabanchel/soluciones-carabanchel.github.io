@@ -11,11 +11,15 @@ export const CAPAS = {
   marco: { svg: 'marco', dxf: 'MARCO', color: '#FF00FF', aci: 6 },
 };
 
+import { textoATrazos, anchoTexto } from '../comun/fuente-trazo.js';
+
 const num = (n) => Number(n.toFixed(3));
 
 /**
  * Pasa las piezas colocadas a un dibujo neutro (y hacia abajo, origen arriba a la izquierda).
- * Devuelve { ancho, alto, marco: {ancho, alto}, cortes: [[x,y]...][], textos: [{x,y,tam,texto}] }
+ * Devuelve { ancho, alto, marco: {ancho, alto}, cortes: [[x,y]...][], textos: [{x,y,tam,texto,trazos}] }
+ * Los textos van en fuente de trazo único: `trazos` son polilíneas abiertas que el
+ * láser graba en una sola pasada.
  */
 export function construirDibujo(cfg, disposicion) {
   const ancho = Math.max(cfg.plancha.ancho, disposicion.ancho);
@@ -30,8 +34,10 @@ export function construirDibujo(cfg, disposicion) {
     if (cfg.etiquetas) {
       const w = girada ? p.h : p.w;
       const h = girada ? p.w : p.h;
-      const tam = Math.max(3, Math.min(8, h / 7, w / (p.nombre.length * 0.75)));
-      textos.push({ x: x + w / 2, y: y + h / 2, tam, texto: p.nombre });
+      const tam = Math.max(3, Math.min(8, h / 7, (w * 0.8) / anchoTexto(p.nombre, 1)));
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+      textos.push({ x: cx, y: cy, tam, texto: p.nombre, trazos: textoATrazos(p.nombre, cx, cy, tam) });
     }
   }
   return { ancho, alto, marco: { ancho: cfg.plancha.ancho, alto: cfg.plancha.alto }, cortes, textos };
@@ -40,14 +46,15 @@ export function construirDibujo(cfg, disposicion) {
 export function aSVG(d, titulo = '') {
   const trazo = 0.01; // línea fina (hairline) para que el láser la trate como vector
   const paths = d.cortes.map((c) => `<path d="${c.map(([x, y], i) => `${i ? 'L' : 'M'}${num(x)} ${num(y)}`).join('')}Z"/>`);
-  const textos = d.textos.map((t) => `<text x="${num(t.x)}" y="${num(t.y + t.tam * 0.35)}" font-size="${num(t.tam)}">${t.texto}</text>`);
+  const linea = (t) => t.map(([x, y], i) => `${i ? 'L' : 'M'}${num(x)} ${num(y)}`).join('');
+  const textos = d.textos.map((t) => `<path data-texto="${t.texto}" d="${t.trazos.map(linea).join('')}"/>`);
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${num(d.ancho)}mm" height="${num(d.alto)}mm" viewBox="0 0 ${num(d.ancho)} ${num(d.alto)}">
   <title>${titulo}</title>
   <g id="${CAPAS.marco.svg}" class="marco" fill="none" stroke="${CAPAS.marco.color}" stroke-width="${trazo}">
     <rect x="0" y="0" width="${num(d.marco.ancho)}" height="${num(d.marco.alto)}"/>
   </g>
-  <g id="${CAPAS.grabado.svg}" class="grabado" fill="none" stroke="${CAPAS.grabado.color}" stroke-width="${trazo}" font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
+  <g id="${CAPAS.grabado.svg}" class="grabado" fill="none" stroke="${CAPAS.grabado.color}" stroke-width="${trazo}" stroke-linecap="round" stroke-linejoin="round">
     ${textos.join('\n    ')}
   </g>
   <g id="${CAPAS.corte.svg}" class="corte" fill="none" stroke="${CAPAS.corte.color}" stroke-width="${trazo}" stroke-linejoin="miter">
@@ -88,8 +95,8 @@ export function aDXF(d) {
   g(0, 'ENDTAB');
   g(0, 'ENDSEC');
 
-  const polilinea = (capa, puntos) => {
-    g(0, 'POLYLINE'); g(8, capa); g(66, 1); g(10, 0); g(20, 0); g(30, 0); g(70, 1); // 70=1: cerrada
+  const polilinea = (capa, puntos, cerrada = true) => {
+    g(0, 'POLYLINE'); g(8, capa); g(66, 1); g(10, 0); g(20, 0); g(30, 0); g(70, cerrada ? 1 : 0); // 70=1: cerrada
     for (const [x, y] of puntos) {
       g(0, 'VERTEX'); g(8, capa); g(10, num(x)); g(20, Y(y)); g(30, 0);
     }
@@ -100,15 +107,9 @@ export function aDXF(d) {
   const m = d.marco;
   polilinea(CAPAS.marco.dxf, [[0, 0], [m.ancho, 0], [m.ancho, m.alto], [0, m.alto]]);
   for (const c of d.cortes) polilinea(CAPAS.corte.dxf, c);
-  for (const t of d.textos) {
-    const x = num(t.x);
-    const y = Y(t.y + t.tam * 0.35);
-    g(0, 'TEXT'); g(8, CAPAS.grabado.dxf);
-    g(10, x); g(20, y); g(30, 0);
-    g(40, num(t.tam)); g(1, t.texto.normalize('NFD').replace(/[̀-ͯ]/g, ''));
-    g(7, 'STANDARD'); g(72, 1); // centrado horizontal
-    g(11, x); g(21, y); g(31, 0);
-  }
+  // Textos en trazo único: polilíneas abiertas, no entidades TEXT (que el láser rellenaría o
+  // contornearía con la fuente del programa).
+  for (const t of d.textos) for (const tr of t.trazos) polilinea(CAPAS.grabado.dxf, tr, false);
   g(0, 'ENDSEC');
   g(0, 'EOF');
   return L.join('\r\n') + '\r\n';
