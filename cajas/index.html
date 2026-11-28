@@ -52,7 +52,7 @@
             <legend>Material</legend>
             <div class="campos dos">
               <label>Grosor <span class="unidad"><input type="number" name="grosor" value="3" min="0.5" step="0.1" inputmode="decimal" list="grosores"></span></label>
-              <label>Pestaña <span class="unidad"><input type="number" name="pestana" value="10" min="2" step="0.5" inputmode="decimal"></span></label>
+              <label>Ancho de pestaña <span class="unidad"><input type="number" name="pestana" value="10" min="2" step="0.5" inputmode="decimal"></span></label>
             </div>
             <datalist id="grosores"><option value="2"><option value="3"><option value="4"><option value="5"><option value="6"></datalist>
             <label class="separado">Kerf (grosor del corte) <span class="unidad"><input type="number" name="kerf" value="0.15" min="0" max="1" step="0.01" inputmode="decimal"></span>
@@ -93,8 +93,11 @@
           <div class="lienzo" id="lienzo"></div>
 
           <div class="ventana3d" id="ventana3d">
-            <div class="zona-cab"><span>3 · Montada en 3D</span>
-              <button class="boton secundario mini" type="button" id="ampliar3d" aria-expanded="false">⤢ Ampliar</button>
+            <div class="zona-cab asa" title="Arrastra para mover"><span>3 · Montada en 3D</span>
+              <span class="botones-ventana">
+                <button class="boton secundario mini" type="button" id="minimizar3d" aria-expanded="true" aria-label="Minimizar la vista 3D">–</button>
+                <button class="boton secundario mini" type="button" id="ampliar3d" aria-expanded="false">⤢ Ampliar</button>
+              </span>
             </div>
             <div class="lienzo3d" id="vista3d">
               <button class="abrir3d" type="button" id="abrir3d">Ver en 3D</button>

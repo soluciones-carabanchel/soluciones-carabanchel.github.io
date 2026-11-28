@@ -2,6 +2,7 @@ import { piezasCaja, validar, tramos, ensamblarCaja } from './geometria.js';
 import { colocar } from './nesting.js';
 import { construirDibujo, aSVG, aDXF } from './exportar.js';
 import { prepararUnidades } from '../comun/unidades.js';
+import { prepararVentana } from '../comun/ventana.js';
 
 const MAQUINAS = {
   trotec: { nombre: 'Trotec Speedy 100', ancho: 600, alto: 300 },
@@ -172,13 +173,25 @@ function abrir3D() {
 }
 
 async function ampliar3D(amplia) {
-  $('ventana3d').classList.toggle('amplia', amplia);
+  if (amplia && $('ventana3d').classList.contains('minima')) ventana.minimizar(false);
+  ventana.ampliar(amplia);
   $('ampliar3d').setAttribute('aria-expanded', String(amplia));
   $('ampliar3d').textContent = amplia ? '⤡ Reducir' : '⤢ Ampliar';
-  await abrir3D();
+  if (amplia) await abrir3D();
   // El visor se redimensiona solo; encuadramos para que la caja llene el nuevo tamaño.
   requestAnimationFrame(() => visor?.encuadrar());
 }
+
+// La ventanita 3D se puede mover arrastrando su cabecera y minimizar.
+const ventana = prepararVentana($('ventana3d'), {
+  alMinimizar: (minima) => {
+    $('minimizar3d').setAttribute('aria-expanded', String(!minima));
+    $('minimizar3d').textContent = minima ? '□' : '–';
+    $('minimizar3d').setAttribute('aria-label', minima ? 'Mostrar la vista 3D' : 'Minimizar la vista 3D');
+    if (minima && $('ventana3d').classList.contains('amplia')) ampliar3D(false);
+  },
+});
+$('minimizar3d').addEventListener('click', () => ventana.minimizar(!$('ventana3d').classList.contains('minima')));
 
 $('abrir3d').addEventListener('click', abrir3D);
 $('ampliar3d').addEventListener('click', () => ampliar3D(!$('ventana3d').classList.contains('amplia')));

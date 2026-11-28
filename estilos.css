@@ -97,7 +97,7 @@ h3 { font-size: 24px; }
    1 · Parámetros (izquierda)  |  2 · Visor del documento (grande)
                                |      con 3 · 3D en una ventanita
    En móvil: visor arriba, parámetros debajo, descargas fijas abajo. */
-.marco-app { display: grid; grid-template-columns: 340px minmax(0, 1fr); border-bottom: var(--raya); }
+.marco-app { display: grid; grid-template-columns: 380px minmax(0, 1fr); border-bottom: var(--raya); }
 .zona { min-width: 0; display: flex; flex-direction: column; }
 .zona + .zona { border-left: var(--raya); }
 .zona-cab {
@@ -109,7 +109,7 @@ h3 { font-size: 24px; }
 .visor { position: relative; flex-grow: 1; padding: 16px; min-height: 420px; display: flex; flex-direction: column; gap: 12px; }
 
 .ventana3d {
-  position: absolute; right: 16px; bottom: 16px; width: min(360px, 45%);
+  position: absolute; right: 16px; top: 16px; width: min(360px, 45%);
   background: var(--gris); border: var(--raya); display: flex; flex-direction: column; z-index: 2;
 }
 .ventana3d .zona-cab { background: var(--papel); padding: 4px 4px 4px 10px; font-size: 11px; }
@@ -118,6 +118,14 @@ h3 { font-size: 24px; }
 .ventana3d.amplia .lienzo3d { height: auto; flex: 1 1 0; min-height: 0; overflow: hidden; }
 .ventana3d .controles3d { display: none; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 10px; border-top: var(--raya); background: var(--papel); font-family: var(--mono); font-size: 12px; }
 .ventana3d.amplia .controles3d { display: flex; }
+.ventana3d .asa { cursor: grab; touch-action: none; user-select: none; }
+.ventana3d.arrastrando .asa { cursor: grabbing; }
+.ventana3d.amplia .asa { cursor: default; }
+.ventana3d.minima { width: 240px; }
+.ventana3d.minima .lienzo3d, .ventana3d.minima .controles3d { display: none; }
+.ventana3d.minima .zona-cab { border-bottom: 0; }
+.botones-ventana { display: flex; gap: 4px; }
+.botones-ventana .boton.mini { min-width: 28px; }
 .controles3d input[type=range] { width: 180px; accent-color: var(--tinta); }
 .lienzo3d { position: relative; }
 .lienzo3d .abrir3d { position: absolute; inset: 0; width: 100%; border: 0; background: transparent; cursor: pointer; font: 900 22px var(--titulos); text-transform: uppercase; }
@@ -134,7 +142,8 @@ h3 { font-size: 24px; }
   .zona + .zona { border-left: 0; }
   .zona.salida { border-bottom: var(--raya); }
   .visor { min-height: 0; }
-  .ventana3d, .ventana3d.amplia { position: static; width: auto; }
+  .ventana3d, .ventana3d.amplia, .ventana3d.minima { position: static; width: auto; }
+  .ventana3d .asa { cursor: default; }
   .ventana3d .lienzo3d { height: 240px; }
   .ventana3d.amplia .lienzo3d { height: 70vh; }
   .barra-descargas { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; }
@@ -150,7 +159,7 @@ h3 { font-size: 24px; }
 .panel legend + * { clear: both; }
 .campos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: var(--raya); }
 .campos.dos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.campos > label { position: relative; padding: 4px 8px 6px; font-family: var(--mono); font-size: 11px; font-weight: 400; gap: 0; }
+.campos > label { padding: 4px 6px 6px 8px; font-family: var(--mono); font-size: 11px; font-weight: 400; gap: 0; }
 .campos > label + label { border-left: var(--raya); }
 .campos > label input { border: 0 !important; padding: 0 !important; font: 600 20px var(--texto) !important; background: transparent !important; outline: 0; }
 .campos > label:focus-within { background: var(--acento); }
@@ -163,7 +172,7 @@ h3 { font-size: 24px; }
 .panel input:focus-visible, .panel select:focus-visible { outline: 3px solid var(--acento); outline-offset: 0; }
 /* Campo con unidad: la unidad va pegada a la cifra. La caja que se ve es .unidad;
    el input se ajusta al ancho de lo escrito (field-sizing, o comun/unidades.js). */
-.unidad { display: flex; align-items: baseline; gap: 3px; cursor: text; }
+.unidad { display: flex; align-items: baseline; gap: 2px; cursor: text; }
 .panel .unidad { border: var(--raya); padding: 8px; background: var(--papel); }
 .panel .unidad:focus-within { outline: 3px solid var(--acento); outline-offset: 0; }
 .panel .unidad input {
@@ -172,22 +181,17 @@ h3 { font-size: 24px; }
 }
 .unidad input::-webkit-inner-spin-button, .unidad input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .unidad input::-webkit-calendar-picker-indicator { display: none !important; }
-.unidad::after { content: attr(data-unidad); font: 12px var(--mono); color: var(--suave); white-space: nowrap; }
+.unidad::after { content: attr(data-unidad); font: 12px var(--mono); color: var(--suave); white-space: nowrap; flex: none; }
 .unidad:not([data-unidad])::after { content: 'mm'; }
-.unidad .flechas { order: 3; margin-left: auto; align-self: center; display: flex; flex-direction: column; }
+.unidad .flechas { order: 3; margin-left: auto; padding-left: 2px; align-self: center; display: flex; flex-direction: column; flex: none; }
 .unidad::after { order: 2; }
 .unidad .flechas button {
-  display: block; width: 22px; height: 15px; touch-action: none; user-select: none; -webkit-user-select: none; padding: 0; border: 0; background: transparent;
+  display: block; width: 14px; height: 13px; touch-action: none; user-select: none; -webkit-user-select: none; padding: 0; border: 0; background: transparent;
   font: 10px/1 var(--mono); color: var(--tinta); cursor: pointer;
 }
 .unidad .flechas button:hover { background: var(--acento); color: var(--acento-texto); }
 .campos .unidad { border: 0; padding: 0; background: transparent; }
 .campos .unidad:focus-within { outline: 0; }
-/* En las celdas, las flechas van arriba a la derecha, junto al nombre, y la cifra
-   tiene todo el ancho; si es larga, la letra baja un poco. */
-.campos .unidad .flechas { position: absolute; top: 2px; right: 2px; flex-direction: row; }
-.campos .unidad.largo input { font-size: 16px !important; }
-.campos .nombre-campo { display: block; padding-right: 46px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .unidad input { min-width: 0; }
 .opciones { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border: var(--raya); }
 .panel .opciones label { flex-direction: row; align-items: center; justify-content: center; gap: 6px; font-weight: 500; padding: 8px; cursor: pointer; text-align: center; }
