@@ -155,3 +155,26 @@ export function validar({ ancho, fondo, alto, grosor, pestana, kerf }) {
   }
   return { errores, avisos };
 }
+
+/**
+ * Piezas colocadas en el espacio para verlas montadas en 3D (comun/visor3d.js).
+ * Ancho en X, fondo en Y, alto en Z, con la esquina del fondo en el origen.
+ * Usa los contornos sin kerf: así se ve la caja con sus medidas reales.
+ */
+export function ensamblarCaja(cfg) {
+  const { ancho, fondo, alto, grosor: t } = cfg;
+  const sitio = {
+    'Fondo': { origen: [0, 0, 0], u: [1, 0, 0], v: [0, 1, 0] },
+    'Tapa': { origen: [0, 0, alto - t], u: [1, 0, 0], v: [0, 1, 0] },
+    'Frente': { origen: [0, t, 0], u: [1, 0, 0], v: [0, 0, 1] },
+    'Trasera': { origen: [0, fondo, 0], u: [1, 0, 0], v: [0, 0, 1] },
+    'Lateral izq.': { origen: [0, 0, 0], u: [0, 1, 0], v: [0, 0, 1] },
+    'Lateral der.': { origen: [ancho - t, 0, 0], u: [0, 1, 0], v: [0, 0, 1] },
+  };
+  return piezasCaja({ ...cfg, kerf: 0 }).map((p) => ({
+    nombre: p.nombre,
+    contorno: p.contorno,
+    grosor: t,
+    colocacion: sitio[p.nombre],
+  }));
+}

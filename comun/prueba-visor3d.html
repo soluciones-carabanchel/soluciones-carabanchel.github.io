@@ -66,22 +66,8 @@
   </footer>
 
   <script type="module">
-    import { piezasCaja, validar } from '../cajas/geometria.js';
+    import { ensamblarCaja, validar } from '../cajas/geometria.js';
     import { crearVisor } from './visor3d.js';
-
-    // Dónde va cada pieza de la caja (ancho en X, fondo en Y, alto en Z).
-    // Ejemplo de uso del visor; la versión buena irá en cajas/geometria.js.
-    function ensamblar({ ancho, fondo, alto, grosor: t }, piezas) {
-      const sitio = {
-        'Fondo':        { origen: [0, 0, 0],          u: [1, 0, 0], v: [0, 1, 0] },
-        'Tapa':         { origen: [0, 0, alto - t],   u: [1, 0, 0], v: [0, 1, 0] },
-        'Frente':       { origen: [0, t, 0],          u: [1, 0, 0], v: [0, 0, 1] },
-        'Trasera':      { origen: [0, fondo, 0],      u: [1, 0, 0], v: [0, 0, 1] },
-        'Lateral izq.': { origen: [0, 0, 0],          u: [0, 1, 0], v: [0, 0, 1] },
-        'Lateral der.': { origen: [ancho - t, 0, 0],  u: [0, 1, 0], v: [0, 0, 1] },
-      };
-      return piezas.map((p) => ({ nombre: p.nombre, contorno: p.contorno, grosor: t, colocacion: sitio[p.nombre] }));
-    }
 
     const form = document.getElementById('formulario');
     const visor = crearVisor(document.getElementById('vista3d'));
@@ -96,7 +82,7 @@
     function actualizar() {
       const cfg = leer();
       if (validar(cfg).errores.length) return;
-      visor.mostrar(ensamblar(cfg, piezasCaja(cfg)), { encuadrar: primera });
+      visor.mostrar(ensamblarCaja(cfg), { encuadrar: primera });
       visor.despiece(form.despiece.value);
       primera = false;
     }

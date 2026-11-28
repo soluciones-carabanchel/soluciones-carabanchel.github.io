@@ -9,11 +9,29 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../estilos.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "../comun/vendor/three/three.module.js",
+        "three/addons/": "../comun/vendor/three/addons/"
+      }
+    }
+  </script>
   <style>
     /* Solo lo propio de cajas: grosor de línea de cada capa en la vista previa */
     .lienzo .corte path { stroke-width: 1.4px; }
     .lienzo .grabado text { stroke-width: 0.6px; }
     .lienzo .marco rect { stroke-width: 1px; stroke-dasharray: 6 4; }
+
+    /* Vista 3D */
+    .vistas { display: flex; gap: 6px; margin-bottom: 10px; }
+    .vistas button { font: 600 14px var(--texto); padding: 6px 14px; border-radius: 999px; border: 1.5px solid var(--linea); background: #fff; color: var(--tinta); cursor: pointer; }
+    .vistas button[aria-pressed=true] { background: var(--tinta); border-color: var(--tinta); color: var(--papel); }
+    #vista3d { height: min(62vh, 520px); background: #fff; border: 1px solid var(--linea); border-radius: 8px; overflow: hidden; }
+    .visor3d-aviso { padding: 16px; margin: 0; color: var(--suave); }
+    .panel label.despiece { display: flex; flex-direction: row; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px; font-weight: 600; margin: 10px 0 16px; }
+    .despiece input { width: 200px; accent-color: var(--acento); }
+    .despiece small { font-weight: 400; color: var(--suave); }
   </style>
 </head>
 <body>
@@ -80,8 +98,19 @@
       <section class="panel resultado" aria-live="polite">
         <div class="resumen" id="resumen"></div>
         <ul class="mensajes" id="mensajes"></ul>
+        <div class="vistas" role="group" aria-label="Vista">
+          <button type="button" id="verPlancha" aria-pressed="true">Plancha</button>
+          <button type="button" id="ver3D" aria-pressed="false">Montada en 3D</button>
+        </div>
         <div class="lienzo" id="lienzo"></div>
-        <div class="leyenda">
+        <div id="panel3d" hidden>
+          <div id="vista3d"></div>
+          <label class="despiece">Despiece <input type="range" id="despiece" min="0" max="1" step="0.01" value="0">
+            <button class="boton secundario" type="button" id="encuadrar" style="padding:6px 14px">Encuadrar</button>
+            <small>Arrastra para girar, rueda o pellizco para acercar.</small>
+          </label>
+        </div>
+        <div class="leyenda" id="leyenda">
           <span><i class="capa-corte-ext"></i>Corte exterior (verde)</span>
           <span><i class="capa-grabado"></i>Grabado vectorial (rojo)</span>
           <span><i class="capa-marco"></i>Marco de la plancha (magenta)</span>
@@ -103,6 +132,7 @@
         <li>Las piezas se colocan juntas en una esquina para dejar libre el retal más grande posible, que podrás aprovechar para otro trabajo.</li>
         <li>Haz primero una prueba con una esquina para comprobar el ajuste y corrige el kerf si hace falta.</li>
         <li>Las medidas son exteriores: el hueco interior útil aparece arriba como «interior».</li>
+        <li><b>Montada en 3D</b>: muestra la caja montada con sus medidas reales (sin kerf). Mueve el deslizador de despiece para ver cómo encajan las pestañas.</li>
       </ul>
     </details>
   </main>
