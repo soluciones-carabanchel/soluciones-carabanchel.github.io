@@ -109,12 +109,12 @@ h3 { font-size: 24px; }
 .visor { position: relative; flex-grow: 1; padding: 16px; min-height: 420px; display: flex; flex-direction: column; gap: 12px; }
 
 .ventana3d {
-  position: absolute; right: 16px; top: 16px; width: min(360px, 45%);
+  position: absolute; right: 16px; top: 16px; width: min(460px, 55%);
   background: var(--gris); border: var(--raya); display: flex; flex-direction: column; z-index: 2;
 }
 .ventana3d .zona-cab { background: var(--papel); padding: 4px 4px 4px 10px; font-size: 11px; }
-.ventana3d .lienzo3d { height: 220px; }
-.ventana3d.amplia { left: 16px; top: 16px; width: auto; }
+.ventana3d .lienzo3d { height: 300px; }
+.ventana3d.amplia { inset: 16px; width: auto; }
 .ventana3d.amplia .lienzo3d { height: auto; flex: 1 1 0; min-height: 0; overflow: hidden; }
 .ventana3d .controles3d { display: none; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 10px; border-top: var(--raya); background: var(--papel); font-family: var(--mono); font-size: 12px; }
 .ventana3d.amplia .controles3d { display: flex; }
@@ -142,10 +142,13 @@ h3 { font-size: 24px; }
   .zona + .zona { border-left: 0; }
   .zona.salida { border-bottom: var(--raya); }
   .visor { min-height: 0; }
+  /* En móvil la ventanita no flota: sin mover, ampliar ni minimizar, y con los controles siempre a la vista. */
   .ventana3d, .ventana3d.amplia, .ventana3d.minima { position: static; width: auto; }
   .ventana3d .asa { cursor: default; }
-  .ventana3d .lienzo3d { height: 240px; }
-  .ventana3d.amplia .lienzo3d { height: 70vh; }
+  .botones-ventana { display: none; }
+  .ventana3d .lienzo3d, .ventana3d.amplia .lienzo3d, .ventana3d.minima .lienzo3d { display: block; height: 260px; flex: none; }
+  .ventana3d .controles3d, .ventana3d.minima .controles3d { display: flex; }
+  .ventana3d.minima .zona-cab { border-bottom: var(--raya); }
   .barra-descargas { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; }
   .barra-descargas .boton { flex: 1; }
   .barra-descargas .leyenda { display: none; }
