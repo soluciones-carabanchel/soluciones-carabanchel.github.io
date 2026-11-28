@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prueba del visor 3D · Soluciones Carabanchel</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../estilos.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three/three.module.js",
+        "three/addons/": "./vendor/three/addons/"
+      }
+    }
+  </script>
+  <style>
+    .intro { padding: 32px 0 8px; }
+    .intro h1 { font-size: clamp(36px, 7vw, 56px); }
+    .intro p { margin: 0; color: var(--suave); max-width: 680px; }
+    .panel { background: var(--tarjeta); border: 1.5px solid var(--tinta); border-radius: var(--radio); padding: 16px; margin-top: 24px; }
+    .controles { display: flex; gap: 12px 20px; flex-wrap: wrap; align-items: end; margin-bottom: 14px; }
+    .controles label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; font-weight: 600; }
+    .controles input[type=number] { width: 90px; font: 16px var(--texto); padding: 6px 8px; border: 1.5px solid var(--linea); border-radius: 8px; }
+    .controles input[type=range] { width: 180px; accent-color: var(--acento); }
+    #vista3d { height: min(65vh, 560px); border: 1px solid var(--linea); border-radius: 8px; overflow: hidden; }
+    .ayuda { font-size: 13px; color: var(--suave); margin: 10px 0 0; }
+  </style>
+</head>
+<body>
+  <header class="cabecera">
+    <div class="envoltorio">
+      <a class="marca" href="../">Soluciones <span>Carabanchel</span></a>
+      <nav><a href="../">← Todas las herramientas</a></nav>
+    </div>
+  </header>
+
+  <main class="envoltorio">
+    <section class="intro">
+      <h1>Prueba del visor 3D</h1>
+      <p>Página de pruebas del visor común. Monta en 3D las piezas que calcula el generador de cajas, sin kerf, para comprobar que las pestañas encajan.</p>
+    </section>
+
+    <div class="panel">
+      <form class="controles" id="formulario" autocomplete="off">
+        <label>Ancho <input type="number" name="ancho" value="150" min="10" step="1"></label>
+        <label>Fondo <input type="number" name="fondo" value="100" min="10" step="1"></label>
+        <label>Alto <input type="number" name="alto" value="80" min="10" step="1"></label>
+        <label>Grosor <input type="number" name="grosor" value="3" min="0.5" step="0.5"></label>
+        <label>Pestaña <input type="number" name="pestana" value="10" min="2" step="0.5"></label>
+        <label><span><input type="checkbox" name="tapa" checked> Con tapa</span></label>
+        <label>Despiece <input type="range" name="despiece" min="0" max="1" step="0.01" value="0"></label>
+        <button class="boton secundario" type="button" id="encuadrar">Encuadrar</button>
+      </form>
+      <div id="vista3d"></div>
+      <p class="ayuda">Arrastra para girar, rueda o pellizco para acercar, botón derecho o dos dedos para desplazar.</p>
+    </div>
+  </main>
+
+  <footer class="envoltorio pie">
+    Soluciones Carabanchel · Proyecto libre con licencia MIT ·
+    <a href="https://github.com/soluciones-carabanchel/soluciones-carabanchel.github.io">GitHub</a>
+  </footer>
+
+  <script type="module">
+    import { piezasCaja, validar } from '../cajas/geometria.js';
+    import { crearVisor } from './visor3d.js';
+
+    // Dónde va cada pieza de la caja (ancho en X, fondo en Y, alto en Z).
+    // Ejemplo de uso del visor; la versión buena irá en cajas/geometria.js.
+    function ensamblar({ ancho, fondo, alto, grosor: t }, piezas) {
+      const sitio = {
+        'Fondo':        { origen: [0, 0, 0],          u: [1, 0, 0], v: [0, 1, 0] },
+        'Tapa':         { origen: [0, 0, alto - t],   u: [1, 0, 0], v: [0, 1, 0] },
+        'Frente':       { origen: [0, t, 0],          u: [1, 0, 0], v: [0, 0, 1] },
+        'Trasera':      { origen: [0, fondo, 0],      u: [1, 0, 0], v: [0, 0, 1] },
+        'Lateral izq.': { origen: [0, 0, 0],          u: [0, 1, 0], v: [0, 0, 1] },
+        'Lateral der.': { origen: [ancho - t, 0, 0],  u: [0, 1, 0], v: [0, 0, 1] },
+      };
+      return piezas.map((p) => ({ nombre: p.nombre, contorno: p.contorno, grosor: t, colocacion: sitio[p.nombre] }));
+    }
+
+    const form = document.getElementById('formulario');
+    const visor = crearVisor(document.getElementById('vista3d'));
+
+    function leer() {
+      const f = new FormData(form);
+      const v = (k) => parseFloat(f.get(k));
+      return { ancho: v('ancho'), fondo: v('fondo'), alto: v('alto'), grosor: v('grosor'), pestana: v('pestana'), kerf: 0, tapa: f.get('tapa') === 'on' };
+    }
+
+    let primera = true;
+    function actualizar() {
+      const cfg = leer();
+      if (validar(cfg).errores.length) return;
+      visor.mostrar(ensamblar(cfg, piezasCaja(cfg)), { encuadrar: primera });
+      visor.despiece(form.despiece.value);
+      primera = false;
+    }
+
+    form.addEventListener('input', (e) => {
+      if (e.target.name === 'despiece') visor.despiece(e.target.value);
+      else actualizar();
+    });
+    document.getElementById('encuadrar').addEventListener('click', () => visor.encuadrar());
+    actualizar();
+    window.visor = visor; // para pruebas desde la consola
+  </script>
+</body>
+</html>
