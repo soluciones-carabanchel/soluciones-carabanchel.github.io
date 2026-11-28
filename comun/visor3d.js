@@ -153,8 +153,13 @@ export function crearVisor(contenedor, opciones = {}) {
   }
 
   function prepararDespiece() {
+    // Medir siempre con el grupo en su sitio: si quedara levantado de un
+    // despiece anterior, el suelo se calcularía mal y la caja subiría.
+    grupo.position.set(0, 0, 0);
+    objetos.forEach(({ obj }) => obj.position.set(0, 0, 0));
+    grupo.updateMatrixWorld(true);
     const total = new THREE.Box3();
-    objetos.forEach(({ obj }) => { obj.position.set(0, 0, 0); total.expandByObject(obj); });
+    objetos.forEach(({ obj }) => total.expandByObject(obj));
     const centro = total.getCenter(new THREE.Vector3());
     const tam = total.getSize(new THREE.Vector3());
     escalaDespiece = Math.max(tam.x, tam.y, tam.z) * 0.45;
