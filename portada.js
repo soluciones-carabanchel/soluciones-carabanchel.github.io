@@ -1,6 +1,7 @@
 // Portada: en la ficha de cajas, una caja montada en gris que gira sola.
 // No es interactiva. Usa el visor 3D común y la geometría real del generador.
-// Si no hay WebGL o falla la carga, se queda el dibujo SVG que ya hay.
+// El dibujo SVG que ya hay en la ficha está oculto y solo se muestra si no hay
+// WebGL o falla la carga (clase .sin3d), para que no asome antes de la caja 3D.
 
 const contenedor = document.getElementById('caja3d');
 const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -12,7 +13,7 @@ const CERCA = 1;     // distancia de la cámara respecto al encuadre del visor
 
 async function arrancar() {
   const { crearVisor, hayWebGL } = await import('./comun/visor3d.js');
-  if (!hayWebGL()) return;
+  if (!hayWebGL()) { contenedor.classList.add('sin3d'); return; }
   const { ensamblarCaja } = await import('./cajas/geometria.js');
 
   const marco = document.createElement('div');
@@ -44,5 +45,8 @@ async function arrancar() {
 }
 
 if (contenedor) {
-  arrancar().catch((e) => console.error('No se ha podido cargar la caja 3D de la portada', e));
+  arrancar().catch((e) => {
+    contenedor.classList.add('sin3d');
+    console.error('No se ha podido cargar la caja 3D de la portada', e);
+  });
 }
