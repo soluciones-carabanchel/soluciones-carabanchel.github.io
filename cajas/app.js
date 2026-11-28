@@ -26,9 +26,7 @@ function leer() {
   };
 }
 
-let ultimoSVG = '';
-let ultimoDXF = '';
-let ultimoNombre = 'caja';
+let archivos = []; // un {nombre, svg, dxf} por plancha
 let ultimaCfg = null;
 let visor = null; // se crea la primera vez que se abre la vista 3D
 
@@ -59,15 +57,29 @@ function actualizar() {
   ultimaCfg = cfg;
   if (visor && !$('panel3d').hidden) visor.mostrar(ensamblarCaja(cfg), { encuadrar: false });
   const disposicion = colocar(piezas, cfg.plancha.ancho, cfg.plancha.alto, 5, Math.max(cfg.separacion, cfg.kerf));
+  const { planchas, noCaben } = disposicion;
+  const medidaPlancha = `${cfg.plancha.ancho} × ${cfg.plancha.alto} mm`;
   avisos.forEach((m) => mensajes.push(['aviso', m]));
-  if (disposicion.cabe) {
-    const r = disposicion.retal;
-    const pct = Math.round(disposicion.aprovechamiento * 100);
-    mensajes.push(['ok', `Las ${piezas.length} piezas caben en una plancha de ${cfg.plancha.ancho} × ${cfg.plancha.alto} mm (ocupan el ${pct} % de la plancha).` +
+  if (noCaben.length) {
+    const lista = noCaben.map((p) => `«${p.nombre}» (${fmt(p.w, 0)} × ${fmt(p.h, 0)} mm)`).join(', ');
+    mensajes.push(['error', (noCaben.length === 1 ? `La pieza ${lista} es más grande` : `Las piezas ${lista} son más grandes`) +
+      ` que la plancha de ${medidaPlancha} y no caben ni giradas, así que no salen en el archivo.` +
+      (cfg.maquina === 'trotec' ? ' Prueba con la Widlaser 900.' : '')]);
+  }
+  if (planchas.length === 1 && !noCaben.length) {
+    const r = planchas[0].retal;
+    const pct = Math.round(planchas[0].aprovechamiento * 100);
+    mensajes.push(['ok', `Las ${piezas.length} piezas caben en una plancha de ${medidaPlancha} (ocupan el ${pct} % de la plancha).` +
       (r && r.ancho > 20 && r.alto > 20 ? ` Queda libre un retal de ${fmt(r.ancho, 0)} × ${fmt(r.alto, 0)} mm.` : '')]);
-  } else {
-    const sugerencia = cfg.maquina === 'trotec' ? ' Prueba con la Widlaser 900 o divide el archivo en varias planchas.' : ' Divide el archivo en varias planchas.';
-    mensajes.push(['error', `Las piezas ocupan ${fmt(disposicion.ancho, 0)} × ${fmt(disposicion.alto, 0)} mm y no caben en la plancha.${sugerencia}`]);
+  } else if (planchas.length > 1) {
+    let sugerencia = '';
+    if (cfg.maquina === 'trotec') {
+      const w = MAQUINAS.widlaser;
+      const enWidlaser = colocar(piezas, w.ancho, w.alto, 5, Math.max(cfg.separacion, cfg.kerf));
+      if (enWidlaser.cabe) sugerencia = ' En la Widlaser 900 cabrían en una sola plancha.';
+    }
+    mensajes.push(['aviso', `No caben en una sola plancha: se reparten en ${planchas.length} planchas de ${medidaPlancha}` +
+      ` (${planchas.map((pl) => pl.colocadas.length).join(' + ')} piezas). Al descargar sale un archivo por plancha.${sugerencia}`]);
   }
   $('mensajes').innerHTML = mensajes.map(([c, m]) => `<li class="${c}">${m}</li>`).join('');
 
@@ -78,13 +90,27 @@ function actualizar() {
     <div class="dato"><b>${interior.map((v) => fmt(v)).join(' × ')}</b><span>interior útil (mm)</span></div>
     <div class="dato"><b>${piezas.length}</b><span>piezas</span></div>`;
 
-  const dibujo = construirDibujo(cfg, disposicion);
-  ultimoSVG = aSVG(dibujo, `Caja ${cfg.ancho}×${cfg.fondo}×${cfg.alto} mm, grosor ${cfg.grosor} mm, kerf ${cfg.kerf} mm`);
-  ultimoDXF = aDXF(dibujo);
-  ultimoNombre = `caja_${cfg.ancho}x${cfg.fondo}x${cfg.alto}_e${cfg.grosor}${cfg.tapa ? '' : '_abierta'}`.replace(/,/g, '.');
-  lienzo.innerHTML = ultimoSVG.replace(/^<\?xml[^>]*>\s*/, '');
-  boton.disabled = false;
-  $('descargarDXF').disabled = false;
+  const titulo = `Caja ${cfg.ancho}×${cfg.fondo}×${cfg.alto} mm, grosor ${cfg.grosor} mm, kerf ${cfg.kerf} mm`;
+  const base = `caja_${cfg.ancho}x${cfg.fondo}x${cfg.alto}_e${cfg.grosor}${cfg.tapa ? '' : '_abierta'}`.replace(/,/g, '.');
+  const n = planchas.length;
+  archivos = planchas.map((pl, i) => {
+    const dibujo = construirDibujo(cfg, pl);
+    const sufijo = n > 1 ? `_plancha${i + 1}de${n}` : '';
+    return {
+      nombre: base + sufijo,
+      svg: aSVG(dibujo, n > 1 ? `${titulo} · plancha ${i + 1} de ${n}` : titulo),
+      dxf: aDXF(dibujo),
+    };
+  });
+  const sinXml = (svg) => svg.replace(/^<\?xml[^>]*>\s*/, '');
+  lienzo.innerHTML = n === 1
+    ? sinXml(archivos[0].svg)
+    : archivos.map((a, i) => `<figure style="margin:0 0 12px">
+        <figcaption style="font-size:13px;margin:0 0 4px">Plancha ${i + 1} de ${n} · ${planchas[i].colocadas.map((c) => c.pieza.nombre).join(', ')}</figcaption>
+        ${sinXml(a.svg)}
+      </figure>`).join('');
+  boton.disabled = !n;
+  $('descargarDXF').disabled = !n;
 
   const pest = (L) => {
     const n = tramos(L, cfg.pestana);
@@ -102,19 +128,24 @@ function actualizar() {
     </td></tr></tfoot>`;
 }
 
-function descargar(contenido, tipo, extension) {
+function descargar(contenido, tipo, nombre) {
   const blob = new Blob([contenido], { type: tipo });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `${ultimoNombre}.${extension}`;
+  a.download = nombre;
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-$('descargar').addEventListener('click', () => descargar(ultimoSVG, 'image/svg+xml', 'svg'));
-$('descargarDXF').addEventListener('click', () => descargar(ultimoDXF, 'application/dxf', 'dxf'));
+/** Descarga un archivo por plancha, con una pausa para que el navegador no se salte ninguno. */
+function descargarTodo(formato, tipo) {
+  archivos.forEach((a, i) => setTimeout(() => descargar(a[formato], tipo, `${a.nombre}.${formato}`), i * 400));
+}
+
+$('descargar').addEventListener('click', () => descargarTodo('svg', 'image/svg+xml'));
+$('descargarDXF').addEventListener('click', () => descargarTodo('dxf', 'application/dxf'));
 
 // Vista 3D: three.js solo se descarga si alguien la abre.
 let encuadrado = false;
