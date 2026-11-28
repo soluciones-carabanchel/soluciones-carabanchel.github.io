@@ -161,11 +161,21 @@ h3 { font-size: 24px; }
   border-radius: 0; background: var(--papel); color: var(--tinta); min-width: 0;
 }
 .panel input:focus-visible, .panel select:focus-visible { outline: 3px solid var(--acento); outline-offset: 0; }
-.unidad { position: relative; display: block; }
-.unidad input { padding-right: 34px; }
-.unidad::after { content: attr(data-unidad); position: absolute; right: 8px; bottom: 9px; font: 12px var(--mono); color: var(--suave); pointer-events: none; }
+/* Campo con unidad: la unidad va pegada a la cifra. La caja que se ve es .unidad;
+   el input se ajusta al ancho de lo escrito (field-sizing, o comun/unidades.js). */
+.unidad { display: flex; align-items: baseline; gap: 3px; cursor: text; }
+.panel .unidad { border: var(--raya); padding: 8px; background: var(--papel); }
+.panel .unidad:focus-within { outline: 3px solid var(--acento); outline-offset: 0; }
+.panel .unidad input {
+  field-sizing: content; width: auto; min-width: 1ch; max-width: 100%; flex: 0 1 auto;
+  border: 0; padding: 0; background: transparent; outline: 0; appearance: textfield; -moz-appearance: textfield;
+}
+.unidad input::-webkit-inner-spin-button, .unidad input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.unidad input::-webkit-calendar-picker-indicator { display: none !important; }
+.unidad::after { content: attr(data-unidad); font: 12px var(--mono); color: var(--suave); white-space: nowrap; }
 .unidad:not([data-unidad])::after { content: 'mm'; }
-.campos .unidad::after { bottom: 4px; right: 0; }
+.campos .unidad { border: 0; padding: 0; background: transparent; }
+.campos .unidad:focus-within { outline: 0; }
 .opciones { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border: var(--raya); }
 .panel .opciones label { flex-direction: row; align-items: center; justify-content: center; gap: 6px; font-weight: 500; padding: 8px; cursor: pointer; text-align: center; }
 .panel .opciones label + label { border-left: var(--raya); }

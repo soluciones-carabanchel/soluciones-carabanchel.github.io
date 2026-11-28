@@ -1,6 +1,7 @@
 import { piezasCaja, validar, tramos, ensamblarCaja } from './geometria.js';
 import { colocar } from './nesting.js';
 import { construirDibujo, aSVG, aDXF } from './exportar.js';
+import { prepararUnidades } from '../comun/unidades.js';
 
 const MAQUINAS = {
   trotec: { nombre: 'Trotec Speedy 100', ancho: 600, alto: 300 },
@@ -156,6 +157,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && $('ventana3d').classList.contains('amplia')) ampliar3D(false);
 });
 
+prepararUnidades(form);
 form.addEventListener('input', actualizar);
 form.addEventListener('change', actualizar);
 actualizar();
