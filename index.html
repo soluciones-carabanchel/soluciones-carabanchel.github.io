@@ -16,14 +16,24 @@
     .herramientas { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); margin-top: 32px; border-top: var(--raya); border-left: var(--raya); }
     .ficha { border-right: var(--raya); border-bottom: var(--raya); display: flex; flex-direction: column; text-decoration: none; color: inherit; background: var(--papel); }
     .ficha .num { font: 600 12px var(--mono); text-transform: uppercase; padding: 8px 14px; border-bottom: var(--raya); display: flex; justify-content: space-between; }
-    .ficha svg { width: 100%; height: 140px; padding: 12px; border-bottom: var(--raya); background: var(--gris); }
+    .ficha svg { width: 100%; height: 140px; padding: 12px; }
+    .caja3d { height: 200px; border-bottom: var(--raya); background: var(--gris); }
+    .caja3d svg { height: 100%; }
+    .lienzo-portada { width: 100%; height: 100%; pointer-events: none; }
     .ficha h3 { margin: 12px 14px 4px; }
     .ficha p { margin: 0 14px 14px; }
     a.ficha:hover { background: var(--acento); }
-    a.ficha:hover svg { background: transparent; }
     .ficha.proxima { justify-content: center; padding: 20px; color: var(--suave); }
     .ficha.proxima h3, .ficha.proxima p { margin-left: 0; margin-right: 0; }
   </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./comun/vendor/three/three.module.js",
+        "three/addons/": "./comun/vendor/three/addons/"
+      }
+    }
+  </script>
 </head>
 <body>
   <header class="cabecera">
@@ -39,14 +49,14 @@
 
     <section class="herramientas" aria-label="Herramientas">
       <a class="ficha" href="cajas/">
-        <div class="num"><span>01 · Corte láser</span><span>SVG · DXF · 3D</span></div>
-        <svg viewBox="0 0 200 120" aria-hidden="true">
+        <div class="num"><span>01 · Corte láser</span><span>SVG · DXF</span></div>
+        <div class="caja3d" id="caja3d"><svg viewBox="0 0 200 120" aria-hidden="true">
           <g stroke="#000" stroke-width="2" stroke-linejoin="round">
             <path d="M50 38 l30 -22 h90 l-30 22 z" fill="#ffffff"/>
             <path d="M140 38 l30 -22 v64 l-30 22 z" fill="#ff2e93"/>
             <path d="M50 38 h90 v6 h-6 v12 h6 v12 h-6 v12 h6 v22 h-90 v-6 h6 v-12 h-6 v-12 h6 v-12 h-6 z" fill="#ffffff"/>
           </g>
-        </svg>
+        </svg></div>
         <h3>Cajas con pestañas</h3>
         <p>Das las medidas exteriores de la caja y el grosor del material, y descargas el despiece en SVG o DXF para corte láser, con la caja montada en 3D para comprobarla.</p>
       </a>
@@ -61,5 +71,6 @@
     Soluciones Carabanchel · Proyecto libre con licencia MIT ·
     <a href="https://github.com/soluciones-carabanchel/soluciones-carabanchel.github.io">GitHub</a>
   </footer>
+  <script type="module" src="portada.js"></script>
 </body>
 </html>
