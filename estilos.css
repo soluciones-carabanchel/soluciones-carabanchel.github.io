@@ -150,7 +150,7 @@ h3 { font-size: 24px; }
 .panel legend + * { clear: both; }
 .campos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: var(--raya); }
 .campos.dos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.campos > label { padding: 4px 8px 6px; font-family: var(--mono); font-size: 11px; font-weight: 400; gap: 0; }
+.campos > label { position: relative; padding: 4px 8px 6px; font-family: var(--mono); font-size: 11px; font-weight: 400; gap: 0; }
 .campos > label + label { border-left: var(--raya); }
 .campos > label input { border: 0 !important; padding: 0 !important; font: 600 20px var(--texto) !important; background: transparent !important; outline: 0; }
 .campos > label:focus-within { background: var(--acento); }
@@ -177,12 +177,18 @@ h3 { font-size: 24px; }
 .unidad .flechas { order: 3; margin-left: auto; align-self: center; display: flex; flex-direction: column; }
 .unidad::after { order: 2; }
 .unidad .flechas button {
-  display: block; width: 22px; height: 15px; padding: 0; border: 0; background: transparent;
+  display: block; width: 22px; height: 15px; touch-action: none; user-select: none; -webkit-user-select: none; padding: 0; border: 0; background: transparent;
   font: 10px/1 var(--mono); color: var(--tinta); cursor: pointer;
 }
 .unidad .flechas button:hover { background: var(--acento); color: var(--acento-texto); }
 .campos .unidad { border: 0; padding: 0; background: transparent; }
 .campos .unidad:focus-within { outline: 0; }
+/* En las celdas, las flechas van arriba a la derecha, junto al nombre, y la cifra
+   tiene todo el ancho; si es larga, la letra baja un poco. */
+.campos .unidad .flechas { position: absolute; top: 2px; right: 2px; flex-direction: row; }
+.campos .unidad.largo input { font-size: 16px !important; }
+.campos .nombre-campo { display: block; padding-right: 46px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.unidad input { min-width: 0; }
 .opciones { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border: var(--raya); }
 .panel .opciones label { flex-direction: row; align-items: center; justify-content: center; gap: 6px; font-weight: 500; padding: 8px; cursor: pointer; text-align: center; }
 .panel .opciones label + label { border-left: var(--raya); }
