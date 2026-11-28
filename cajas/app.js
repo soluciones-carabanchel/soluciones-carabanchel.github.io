@@ -1,4 +1,4 @@
-import { piezasCaja, validar, tramos } from './geometria.js';
+import { piezasCaja, validar, tramos, ensamblarCaja } from './geometria.js';
 import { colocar } from './nesting.js';
 import { construirDibujo, aSVG, aDXF } from './exportar.js';
 
@@ -29,6 +29,8 @@ function leer() {
 let ultimoSVG = '';
 let ultimoDXF = '';
 let ultimoNombre = 'caja';
+let ultimaCfg = null;
+let visor = null; // se crea la primera vez que se abre la vista 3D
 
 function actualizar() {
   const cfg = leer();
@@ -54,6 +56,8 @@ function actualizar() {
   }
 
   const piezas = piezasCaja(cfg);
+  ultimaCfg = cfg;
+  if (visor && !$('panel3d').hidden) visor.mostrar(ensamblarCaja(cfg), { encuadrar: false });
   const disposicion = colocar(piezas, cfg.plancha.ancho, cfg.plancha.alto, 5, Math.max(cfg.separacion, cfg.kerf));
   avisos.forEach((m) => mensajes.push(['aviso', m]));
   if (disposicion.cabe) {
@@ -111,6 +115,36 @@ function descargar(contenido, tipo, extension) {
 
 $('descargar').addEventListener('click', () => descargar(ultimoSVG, 'image/svg+xml', 'svg'));
 $('descargarDXF').addEventListener('click', () => descargar(ultimoDXF, 'application/dxf', 'dxf'));
+
+// Vista 3D: three.js solo se descarga si alguien la abre.
+let encuadrado = false;
+async function mostrarVista(en3D) {
+  $('verPlancha').setAttribute('aria-pressed', String(!en3D));
+  $('ver3D').setAttribute('aria-pressed', String(en3D));
+  $('lienzo').hidden = en3D;
+  $('leyenda').hidden = en3D;
+  $('panel3d').hidden = !en3D;
+  if (!en3D) return;
+  if (!visor) {
+    try {
+      const { crearVisor } = await import('../comun/visor3d.js');
+      visor = crearVisor($('vista3d'));
+    } catch (e) {
+      $('vista3d').innerHTML = '<p class="visor3d-aviso">No se ha podido cargar la vista 3D.</p>';
+      console.error(e);
+      return;
+    }
+  }
+  if (ultimaCfg) {
+    visor.mostrar(ensamblarCaja(ultimaCfg), { encuadrar: !encuadrado });
+    visor.despiece($('despiece').value);
+    encuadrado = true;
+  }
+}
+$('verPlancha').addEventListener('click', () => mostrarVista(false));
+$('ver3D').addEventListener('click', () => mostrarVista(true));
+$('despiece').addEventListener('input', (e) => visor?.despiece(e.target.value));
+$('encuadrar').addEventListener('click', () => visor?.encuadrar());
 
 form.addEventListener('input', actualizar);
 form.addEventListener('change', actualizar);
