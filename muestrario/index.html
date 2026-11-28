@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Muestrario · Soluciones Carabanchel</title>
+  <meta name="robots" content="noindex">
+  <meta name="description" content="Piezas comunes de las herramientas de Soluciones Carabanchel. Sirve también de plantilla para empezar una app nueva.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../estilos.css">
+  <!-- Aquí solo lo propio de cada herramienta. Lo común está en estilos.css. -->
+</head>
+<body>
+  <header class="cabecera">
+    <div class="envoltorio">
+      <a class="marca" href="../">Soluciones <span>Carabanchel</span></a>
+      <nav><a href="../">← Todas las herramientas</a></nav>
+    </div>
+  </header>
+
+  <main class="envoltorio">
+    <!-- 1. Intro: nombre de la herramienta y una frase de qué hace -->
+    <section class="intro">
+      <h1>Muestrario</h1>
+      <p>Las piezas comunes de todas las herramientas. Para empezar una app nueva, copia esta carpeta, cámbiale el nombre y borra lo que no uses.</p>
+    </section>
+
+    <!-- 2. App: panel de datos (izquierda) y resultado (derecha). En móvil se apilan. -->
+    <div class="app">
+      <form class="panel" autocomplete="off">
+        <fieldset>
+          <legend>Medidas</legend>
+          <!-- .campos = 3 columnas; .campos.dos = 2 columnas -->
+          <div class="campos">
+            <label>Ancho <span class="unidad"><input type="number" value="150" inputmode="decimal"></span></label>
+            <label>Fondo <span class="unidad"><input type="number" value="100" inputmode="decimal"></span></label>
+            <label>Alto <span class="unidad"><input type="number" value="80" inputmode="decimal"></span></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Material</legend>
+          <div class="campos dos">
+            <!-- La unidad por defecto es mm; data-unidad la cambia -->
+            <label>Grosor <span class="unidad"><input type="number" value="3" step="0.1" inputmode="decimal"></span></label>
+            <label>Ángulo <span class="unidad" data-unidad="°"><input type="number" value="45" inputmode="decimal"></span></label>
+          </div>
+          <label class="separado">Kerf <span class="unidad"><input type="number" value="0.15" step="0.01" inputmode="decimal"></span>
+            <small>Texto de ayuda bajo un campo: explica qué hacer si el resultado no sale bien.</small>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Opciones</legend>
+          <div class="opciones" role="radiogroup" aria-label="Ejemplo de opciones">
+            <label><input type="radio" name="op" value="a" checked> Opción A</label>
+            <label><input type="radio" name="op" value="b"> Opción B</label>
+          </div>
+          <label class="check separado"><input type="checkbox" checked> Una casilla</label>
+          <p class="ayuda">Párrafo de ayuda suelto.</p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Máquina</legend>
+          <select aria-label="Máquina">
+            <option>Trotec Speedy 100 · 600 × 300 mm</option>
+            <option>Widlaser 900 · 1200 × 800 mm</option>
+          </select>
+        </fieldset>
+      </form>
+
+      <section class="panel" aria-live="polite">
+        <!-- Cifras clave del resultado -->
+        <div class="resumen">
+          <div class="dato"><b>150 × 100 × 80</b><span>exterior (mm)</span></div>
+          <div class="dato"><b>6</b><span>piezas</span></div>
+        </div>
+
+        <!-- Avisos: error, aviso u ok. Si la lista está vacía no ocupa sitio. -->
+        <ul class="mensajes">
+          <li class="error">Error: algo impide generar el archivo.</li>
+          <li class="aviso">Aviso: se puede generar, pero conviene revisarlo.</li>
+          <li class="ok">Todo bien: cabe en la plancha.</li>
+        </ul>
+
+        <!-- Vista previa del archivo (SVG en mm, a escala) -->
+        <div class="lienzo">
+          <svg viewBox="0 0 600 300" aria-label="Vista previa de ejemplo">
+            <rect x="1" y="1" width="598" height="298" fill="none" stroke="#ff00ff" stroke-dasharray="6 4"/>
+            <rect x="20" y="20" width="150" height="100" fill="none" stroke="#00ff00" stroke-width="1.4"/>
+            <circle cx="95" cy="70" r="20" fill="none" stroke="#0000ff" stroke-width="1.4"/>
+            <rect x="185" y="20" width="150" height="80" fill="none" stroke="#00ff00" stroke-width="1.4"/>
+            <text x="260" y="66" font-size="14" text-anchor="middle" fill="none" stroke="#ff0000" stroke-width="0.6">PIEZA</text>
+          </svg>
+        </div>
+
+        <!-- Leyenda con los colores de capa del FabLab -->
+        <div class="leyenda">
+          <span><i class="capa-raster"></i>Raster (negro)</span>
+          <span><i class="capa-grabado"></i>Grabado vectorial (rojo)</span>
+          <span><i class="capa-corte-int"></i>Corte interior (azul)</span>
+          <span><i class="capa-corte-medio"></i>Corte medio (cian)</span>
+          <span><i class="capa-corte-ext"></i>Corte exterior (verde)</span>
+          <span><i class="capa-marco"></i>Marco (magenta)</span>
+        </div>
+
+        <div class="acciones">
+          <button class="boton" type="button">Descargar SVG</button>
+          <button class="boton secundario" type="button">Descargar DXF</button>
+          <button class="boton" type="button" disabled>Desactivado</button>
+        </div>
+
+        <table class="tabla">
+          <thead><tr><th>Pieza</th><th class="num">Medida (mm)</th><th class="num">Uds.</th></tr></thead>
+          <tbody>
+            <tr><td>Fondo y tapa</td><td class="num">150 × 100</td><td class="num">2</td></tr>
+            <tr><td>Laterales</td><td class="num">100 × 80</td><td class="num">2</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- 3. Notas plegables: cómo usar el archivo en el taller -->
+    <details class="notas" open>
+      <summary>Cómo usar el archivo en el FabLab</summary>
+      <ul>
+        <li>Qué programa abre cada formato y en qué unidades.</li>
+        <li>Qué significa cada color de capa.</li>
+        <li>Qué probar antes de cortar la pieza entera.</li>
+      </ul>
+    </details>
+  </main>
+
+  <footer class="envoltorio pie">
+    Soluciones Carabanchel · Proyecto libre con licencia MIT ·
+    <a href="https://github.com/soluciones-carabanchel/soluciones-carabanchel.github.io">GitHub</a>
+  </footer>
+</body>
+</html>
