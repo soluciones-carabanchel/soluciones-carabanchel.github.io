@@ -177,6 +177,7 @@ h3 { font-size: 24px; }
 .panel .unidad:focus-within { outline: 3px solid var(--acento); outline-offset: 0; }
 .panel .unidad input {
   field-sizing: content; width: auto; min-width: 1ch; max-width: 100%; flex: 0 1 auto;
+  font: 600 20px var(--texto);
   border: 0; padding: 0; background: transparent; outline: 0; appearance: textfield; -moz-appearance: textfield;
 }
 .unidad input::-webkit-inner-spin-button, .unidad input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
