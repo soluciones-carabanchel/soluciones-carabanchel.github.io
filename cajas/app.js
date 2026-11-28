@@ -106,8 +106,8 @@ function actualizar() {
   const sinXml = (svg) => svg.replace(/^<\?xml[^>]*>\s*/, '');
   lienzo.innerHTML = n === 1
     ? sinXml(archivos[0].svg)
-    : archivos.map((a, i) => `<figure style="margin:0 0 12px">
-        <figcaption style="font-size:13px;margin:0 0 4px">Plancha ${i + 1} de ${n} · ${planchas[i].colocadas.map((c) => c.pieza.nombre).join(', ')}</figcaption>
+    : archivos.map((a, i) => `<figure class="plancha">
+        <figcaption>Plancha ${i + 1} de ${n} · ${planchas[i].colocadas.map((c) => c.pieza.nombre).join(', ')}</figcaption>
         ${sinXml(a.svg)}
       </figure>`).join('');
   boton.disabled = !n;

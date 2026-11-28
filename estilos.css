@@ -211,6 +211,9 @@ h3 { font-size: 24px; }
 .lienzo { background: var(--papel); overflow: hidden; }
 .lienzo svg { display: block; width: 100%; height: auto; max-height: 64vh; }
 .lienzo svg * { vector-effect: non-scaling-stroke; }
+/* Varias planchas: una figura por plancha */
+.lienzo .plancha { margin: 0 0 16px; }
+.lienzo .plancha figcaption { font: 12px var(--mono); text-transform: uppercase; margin: 0 0 4px; }
 
 /* Leyenda de capas: <span><i class="capa-corte-ext"></i>…</span> */
 .leyenda { display: flex; gap: 14px; flex-wrap: wrap; font: 12px var(--mono); margin: 10px 0; }
