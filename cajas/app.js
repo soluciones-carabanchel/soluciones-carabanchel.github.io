@@ -1,6 +1,7 @@
 import { piezasCaja, validar, tramos, ensamblarCaja } from './geometria.js';
 import { colocar } from './nesting.js';
 import { construirDibujo, aSVG, aDXF } from './exportar.js';
+import { prepararUnidades } from '../comun/unidades.js';
 
 const MAQUINAS = {
   trotec: { nombre: 'Trotec Speedy 100', ancho: 600, alto: 300 },
@@ -55,7 +56,7 @@ function actualizar() {
 
   const piezas = piezasCaja(cfg);
   ultimaCfg = cfg;
-  if (visor && !$('panel3d').hidden) visor.mostrar(ensamblarCaja(cfg), { encuadrar: false });
+  if (visor) visor.mostrar(ensamblarCaja(cfg), { encuadrar: false });
   const disposicion = colocar(piezas, cfg.plancha.ancho, cfg.plancha.alto, 5, Math.max(cfg.separacion, cfg.kerf));
   const { planchas, noCaben } = disposicion;
   const medidaPlancha = `${cfg.plancha.ancho} × ${cfg.plancha.alto} mm`;
@@ -105,8 +106,8 @@ function actualizar() {
   const sinXml = (svg) => svg.replace(/^<\?xml[^>]*>\s*/, '');
   lienzo.innerHTML = n === 1
     ? sinXml(archivos[0].svg)
-    : archivos.map((a, i) => `<figure style="margin:0 0 12px">
-        <figcaption style="font-size:13px;margin:0 0 4px">Plancha ${i + 1} de ${n} · ${planchas[i].colocadas.map((c) => c.pieza.nombre).join(', ')}</figcaption>
+    : archivos.map((a, i) => `<figure class="plancha">
+        <figcaption>Plancha ${i + 1} de ${n} · ${planchas[i].colocadas.map((c) => c.pieza.nombre).join(', ')}</figcaption>
         ${sinXml(a.svg)}
       </figure>`).join('');
   boton.disabled = !n;
@@ -147,36 +148,47 @@ function descargarTodo(formato, tipo) {
 $('descargar').addEventListener('click', () => descargarTodo('svg', 'image/svg+xml'));
 $('descargarDXF').addEventListener('click', () => descargarTodo('dxf', 'application/dxf'));
 
-// Vista 3D: three.js solo se descarga si alguien la abre.
-let encuadrado = false;
-async function mostrarVista(en3D) {
-  $('verPlancha').setAttribute('aria-pressed', String(!en3D));
-  $('ver3D').setAttribute('aria-pressed', String(en3D));
-  $('lienzo').hidden = en3D;
-  $('leyenda').hidden = en3D;
-  $('panel3d').hidden = !en3D;
-  if (!en3D) return;
-  if (!visor) {
+// Vista 3D en la ventanita: three.js solo se descarga si alguien la abre.
+let cargando = null;
+function abrir3D() {
+  if (cargando) return cargando;
+  const contenedor = $('vista3d');
+  cargando = (async () => {
+    $('abrir3d').remove();
     try {
       const { crearVisor } = await import('../comun/visor3d.js');
-      visor = crearVisor($('vista3d'));
+      visor = crearVisor(contenedor, { fondo: '#f2f2ee' });
     } catch (e) {
-      $('vista3d').innerHTML = '<p class="visor3d-aviso">No se ha podido cargar la vista 3D.</p>';
+      contenedor.innerHTML = '<p class="visor3d-aviso">No se ha podido cargar la vista 3D.</p>';
       console.error(e);
       return;
     }
-  }
-  if (ultimaCfg) {
-    visor.mostrar(ensamblarCaja(ultimaCfg), { encuadrar: !encuadrado });
-    visor.despiece($('despiece').value);
-    encuadrado = true;
-  }
+    if (ultimaCfg) {
+      visor.mostrar(ensamblarCaja(ultimaCfg), { encuadrar: true });
+      visor.despiece($('despiece').value);
+    }
+  })();
+  return cargando;
 }
-$('verPlancha').addEventListener('click', () => mostrarVista(false));
-$('ver3D').addEventListener('click', () => mostrarVista(true));
+
+async function ampliar3D(amplia) {
+  $('ventana3d').classList.toggle('amplia', amplia);
+  $('ampliar3d').setAttribute('aria-expanded', String(amplia));
+  $('ampliar3d').textContent = amplia ? '⤡ Reducir' : '⤢ Ampliar';
+  await abrir3D();
+  // El visor se redimensiona solo; encuadramos para que la caja llene el nuevo tamaño.
+  requestAnimationFrame(() => visor?.encuadrar());
+}
+
+$('abrir3d').addEventListener('click', abrir3D);
+$('ampliar3d').addEventListener('click', () => ampliar3D(!$('ventana3d').classList.contains('amplia')));
 $('despiece').addEventListener('input', (e) => visor?.despiece(e.target.value));
 $('encuadrar').addEventListener('click', () => visor?.encuadrar());
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && $('ventana3d').classList.contains('amplia')) ampliar3D(false);
+});
 
+prepararUnidades(form);
 form.addEventListener('input', actualizar);
 form.addEventListener('change', actualizar);
 actualizar();

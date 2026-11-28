@@ -7,7 +7,7 @@
   <meta name="description" content="Generador de cajas con uniones de pestañas para corte láser. Medidas exteriores, grosor y kerf; descarga en SVG por capas.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../estilos.css">
   <script type="importmap">
     {
@@ -20,110 +20,109 @@
   <style>
     /* Solo lo propio de cajas: grosor de línea de cada capa en la vista previa */
     .lienzo .corte path { stroke-width: 1.4px; }
-    .lienzo .grabado text { stroke-width: 0.6px; }
-    .lienzo .marco rect { stroke-width: 1px; stroke-dasharray: 6 4; }
-
-    /* Vista 3D */
-    .vistas { display: flex; gap: 6px; margin-bottom: 10px; }
-    .vistas button { font: 600 14px var(--texto); padding: 6px 14px; border-radius: 999px; border: 1.5px solid var(--linea); background: #fff; color: var(--tinta); cursor: pointer; }
-    .vistas button[aria-pressed=true] { background: var(--tinta); border-color: var(--tinta); color: var(--papel); }
-    #vista3d { height: min(62vh, 520px); background: #fff; border: 1px solid var(--linea); border-radius: 8px; overflow: hidden; }
-    .visor3d-aviso { padding: 16px; margin: 0; color: var(--suave); }
-    .panel label.despiece { display: flex; flex-direction: row; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px; font-weight: 600; margin: 10px 0 16px; }
-    .despiece input { width: 200px; accent-color: var(--acento); }
-    .despiece small { font-weight: 400; color: var(--suave); }
+    .lienzo .grabado path { stroke-width: 0.8px; }
+    .lienzo .marco rect { stroke-width: 1px; }
+    .detalles { padding-top: 24px; }
   </style>
 </head>
 <body>
   <header class="cabecera">
-    <div class="envoltorio">
-      <a class="marca" href="../">Soluciones <span>Carabanchel</span></a>
-      <nav><a href="../">← Todas las herramientas</a></nav>
+    <div class="izq">
+      <a class="marca" href="../">Soluciones Carabanchel</a>
+      <h1 class="titulo-app">Cajas con pestañas</h1>
     </div>
+    <nav><a href="../">Herramientas</a><a href="#como-se-usa">Cómo se usa</a></nav>
   </header>
 
-  <main class="envoltorio">
-    <section class="intro">
-      <h1>Cajas con pestañas</h1>
-      <p>Indica las medidas <strong>exteriores</strong> de la caja y el grosor del material. La herramienta calcula las pestañas, coloca las piezas en la plancha y te da un SVG o un DXF listo para mandar al láser.</p>
-    </section>
+  <main>
+    <div class="marco-app">
+      <section class="zona entrada">
+        <div class="zona-cab"><span>1 · Parámetros</span><span>medidas exteriores</span></div>
+        <form class="panel" id="formulario" autocomplete="off" aria-label="Parámetros">
+          <fieldset>
+            <legend>Medidas exteriores</legend>
+            <div class="campos">
+              <label>Ancho <span class="unidad"><input type="number" name="ancho" value="150" min="10" step="0.5" inputmode="decimal"></span></label>
+              <label>Fondo <span class="unidad"><input type="number" name="fondo" value="100" min="10" step="0.5" inputmode="decimal"></span></label>
+              <label>Alto <span class="unidad"><input type="number" name="alto" value="80" min="10" step="0.5" inputmode="decimal"></span></label>
+            </div>
+          </fieldset>
 
-    <div class="app">
-      <form class="panel" id="formulario" autocomplete="off">
-        <fieldset>
-          <legend>Medidas exteriores</legend>
-          <div class="campos">
-            <label>Ancho <span class="unidad"><input type="number" name="ancho" value="150" min="10" step="0.5" inputmode="decimal"></span></label>
-            <label>Fondo <span class="unidad"><input type="number" name="fondo" value="100" min="10" step="0.5" inputmode="decimal"></span></label>
-            <label>Alto <span class="unidad"><input type="number" name="alto" value="80" min="10" step="0.5" inputmode="decimal"></span></label>
-          </div>
-        </fieldset>
+          <fieldset>
+            <legend>Material</legend>
+            <div class="campos dos">
+              <label>Grosor <span class="unidad"><input type="number" name="grosor" value="3" min="0.5" step="0.1" inputmode="decimal" list="grosores"></span></label>
+              <label>Pestaña <span class="unidad"><input type="number" name="pestana" value="10" min="2" step="0.5" inputmode="decimal"></span></label>
+            </div>
+            <datalist id="grosores"><option value="2"><option value="3"><option value="4"><option value="5"><option value="6"></datalist>
+            <label class="separado">Kerf (grosor del corte) <span class="unidad"><input type="number" name="kerf" value="0.15" min="0" max="1" step="0.01" inputmode="decimal"></span>
+              <small>Se compensa para que las piezas salgan a medida y las pestañas ajusten. Si quedan flojas, súbelo; si no entran, bájalo.</small>
+            </label>
+          </fieldset>
 
-        <fieldset>
-          <legend>Material</legend>
-          <div class="campos dos">
-            <label>Grosor <span class="unidad"><input type="number" name="grosor" value="3" min="0.5" step="0.1" inputmode="decimal" list="grosores"></span></label>
-            <label>Ancho de pestaña <span class="unidad"><input type="number" name="pestana" value="10" min="2" step="0.5" inputmode="decimal"></span></label>
-          </div>
-          <datalist id="grosores"><option value="2"><option value="3"><option value="4"><option value="5"><option value="6"></datalist>
-          <label class="separado">Kerf (grosor del corte) <span class="unidad"><input type="number" name="kerf" value="0.15" min="0" max="1" step="0.01" inputmode="decimal"></span>
-            <small>Se compensa para que las piezas salgan a medida y las pestañas ajusten. Si quedan flojas, súbelo; si no entran, bájalo.</small>
-          </label>
-        </fieldset>
+          <fieldset>
+            <legend>Caja</legend>
+            <div class="opciones" role="radiogroup" aria-label="Tipo de caja">
+              <label><input type="radio" name="tapa" value="no" checked> Abierta</label>
+              <label><input type="radio" name="tapa" value="si"> Cerrada (con tapa)</label>
+            </div>
+            <label class="check separado"><input type="checkbox" name="etiquetas" checked> Grabar el nombre de cada pieza</label>
+          </fieldset>
 
-        <fieldset>
-          <legend>Caja</legend>
-          <div class="opciones" role="radiogroup" aria-label="Tipo de caja">
-            <label><input type="radio" name="tapa" value="si" checked> Cerrada (con tapa)</label>
-            <label><input type="radio" name="tapa" value="no"> Abierta</label>
-          </div>
-          <label class="check separado"><input type="checkbox" name="etiquetas" checked> Grabar el nombre de cada pieza</label>
-        </fieldset>
-
-        <fieldset>
-          <legend>Máquina</legend>
-          <select name="maquina" aria-label="Máquina láser">
-            <option value="trotec" selected>Trotec Speedy 100 · 600 × 300 mm</option>
-            <option value="widlaser">Widlaser 900 · 1200 × 800 mm</option>
-            <option value="otra">Otra plancha…</option>
-          </select>
-          <label class="separado">Separación entre piezas <span class="unidad"><input type="number" name="separacion" value="3" min="0" max="20" step="0.5" inputmode="decimal"></span></label>
-          <div class="campos dos separado" id="plancha" hidden>
-            <label>Ancho plancha <span class="unidad"><input type="number" name="planchaAncho" value="600" min="50" step="1" inputmode="decimal"></span></label>
-            <label>Alto plancha <span class="unidad"><input type="number" name="planchaAlto" value="400" min="50" step="1" inputmode="decimal"></span></label>
-          </div>
-        </fieldset>
-      </form>
-
-      <section class="panel resultado" aria-live="polite">
+          <fieldset>
+            <legend>Máquina</legend>
+            <select name="maquina" aria-label="Máquina láser">
+              <option value="trotec" selected>Trotec Speedy 100 · 600 × 300 mm</option>
+              <option value="widlaser">Widlaser 900 · 1200 × 800 mm</option>
+              <option value="otra">Otra plancha…</option>
+            </select>
+            <label class="separado">Separación entre piezas <span class="unidad"><input type="number" name="separacion" value="3" min="0" max="20" step="0.5" inputmode="decimal"></span></label>
+            <div class="campos dos separado" id="plancha" hidden>
+              <label>Ancho plancha <span class="unidad"><input type="number" name="planchaAncho" value="600" min="50" step="1" inputmode="decimal"></span></label>
+              <label>Alto plancha <span class="unidad"><input type="number" name="planchaAlto" value="400" min="50" step="1" inputmode="decimal"></span></label>
+            </div>
+          </fieldset>
+        </form>
         <div class="resumen" id="resumen"></div>
-        <ul class="mensajes" id="mensajes"></ul>
-        <div class="vistas" role="group" aria-label="Vista">
-          <button type="button" id="verPlancha" aria-pressed="true">Plancha</button>
-          <button type="button" id="ver3D" aria-pressed="false">Montada en 3D</button>
+      </section>
+
+      <section class="zona salida" aria-live="polite">
+        <div class="zona-cab"><span>2 · Plano</span><span>lo que se descarga</span></div>
+        <div class="visor">
+          <ul class="mensajes" id="mensajes"></ul>
+          <div class="lienzo" id="lienzo"></div>
+
+          <div class="ventana3d" id="ventana3d">
+            <div class="zona-cab"><span>3 · Montada en 3D</span>
+              <button class="boton secundario mini" type="button" id="ampliar3d" aria-expanded="false">⤢ Ampliar</button>
+            </div>
+            <div class="lienzo3d" id="vista3d">
+              <button class="abrir3d" type="button" id="abrir3d">Ver en 3D</button>
+            </div>
+            <div class="controles3d">
+              <label>Despiece <input type="range" id="despiece" min="0" max="1" step="0.01" value="0"></label>
+              <button class="boton secundario mini" type="button" id="encuadrar">Encuadrar</button>
+              <span>Arrastra para girar · rueda o pellizco para acercar</span>
+            </div>
+          </div>
         </div>
-        <div class="lienzo" id="lienzo"></div>
-        <div id="panel3d" hidden>
-          <div id="vista3d"></div>
-          <label class="despiece">Despiece <input type="range" id="despiece" min="0" max="1" step="0.01" value="0">
-            <button class="boton secundario" type="button" id="encuadrar" style="padding:6px 14px">Encuadrar</button>
-            <small>Arrastra para girar, rueda o pellizco para acercar.</small>
-          </label>
+        <div class="barra-descargas">
+          <button class="boton secundario" id="descargar" type="button">↓ SVG</button>
+          <button class="boton secundario" id="descargarDXF" type="button">↓ DXF</button>
+          <div class="leyenda" id="leyenda">
+            <span><i class="capa-corte-ext"></i>Corte exterior</span>
+            <span><i class="capa-grabado"></i>Grabado</span>
+            <span><i class="capa-marco"></i>Marco, no se corta</span>
+          </div>
         </div>
-        <div class="leyenda" id="leyenda">
-          <span><i class="capa-corte-ext"></i>Corte exterior (verde)</span>
-          <span><i class="capa-grabado"></i>Grabado vectorial (rojo)</span>
-          <span><i class="capa-marco"></i>Marco de la plancha (magenta)</span>
-        </div>
-        <div class="acciones">
-          <button class="boton" id="descargar" type="button">Descargar SVG</button>
-          <button class="boton secundario" id="descargarDXF" type="button">Descargar DXF</button>
-        </div>
-        <table class="tabla" id="tabla"></table>
       </section>
     </div>
 
-    <details class="notas">
+    <div class="envoltorio detalles">
+      <h2>Piezas</h2>
+      <table class="tabla" id="tabla"></table>
+
+    <details class="notas" id="como-se-usa">
       <summary>Cómo usar el archivo en el FabLab</summary>
       <ul>
         <li><b>SVG</b>: ábrelo en Illustrator; se abre a escala real (mm) y con capas separadas por color, según las plantillas del FabLab.</li>
@@ -132,9 +131,10 @@
         <li>Las piezas se colocan juntas en una esquina para dejar libre el retal más grande posible, que podrás aprovechar para otro trabajo.</li>
         <li>Haz primero una prueba con una esquina para comprobar el ajuste y corrige el kerf si hace falta.</li>
         <li>Las medidas son exteriores: el hueco interior útil aparece arriba como «interior».</li>
-        <li><b>Montada en 3D</b>: muestra la caja montada con sus medidas reales (sin kerf). Mueve el deslizador de despiece para ver cómo encajan las pestañas.</li>
+        <li><b>Montada en 3D</b>: la ventanita de la esquina muestra la caja montada con sus medidas reales (sin kerf). Amplíala para girarla y mover el deslizador de despiece y ver cómo encajan las pestañas.</li>
       </ul>
     </details>
+    </div>
   </main>
 
   <footer class="envoltorio pie">
