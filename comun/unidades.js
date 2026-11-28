@@ -12,15 +12,7 @@ export function prepararUnidades(raiz = document) {
     caja.addEventListener('mousedown', (e) => {
       if (e.target === caja) { e.preventDefault(); input.focus(); }
     });
-    // En las celdas (.campos) las flechas van junto al nombre: lo envolvemos para
-    // dejarles sitio sin que se monten encima.
     const etiqueta = caja.closest('label');
-    if (caja.closest('.campos') && etiqueta?.firstChild?.nodeType === Node.TEXT_NODE && etiqueta.firstChild.textContent.trim()) {
-      const nombre = document.createElement('span');
-      nombre.className = 'nombre-campo';
-      nombre.textContent = etiqueta.firstChild.textContent.trim();
-      etiqueta.firstChild.replaceWith(nombre);
-    }
     // Flechas de subir y bajar al borde derecho, fuera de la cifra y de la unidad.
     if (input.type === 'number' && !caja.querySelector('.flechas')) {
       const flechas = document.createElement('span');
@@ -62,10 +54,6 @@ export function prepararUnidades(raiz = document) {
       }
       caja.append(flechas);
     }
-    // Cifras largas (p. ej. 1200,5): letra algo más pequeña para que quepan.
-    const largo = () => caja.classList.toggle('largo', input.value.length > 4);
-    input.addEventListener('input', largo);
-    largo();
     if (nativo) continue;
     const ajustar = () => { input.style.width = `${Math.max(1, input.value.length) + 0.5}ch`; };
     input.addEventListener('input', ajustar);

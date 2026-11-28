@@ -18,7 +18,8 @@
     .ficha .num { font: 600 12px var(--mono); text-transform: uppercase; padding: 8px 14px; border-bottom: var(--raya); display: flex; justify-content: space-between; }
     .ficha svg { width: 100%; height: 140px; padding: 12px; }
     .caja3d { height: 200px; border-bottom: var(--raya); background: #fff; }
-    .caja3d svg { height: 100%; }
+    .caja3d svg { height: 100%; visibility: hidden; } /* el dibujo solo se ve si no hay 3D */
+    .caja3d.sin3d svg { visibility: visible; }
     .lienzo-portada { width: 100%; height: 100%; pointer-events: none; }
     .ficha h3 { margin: 12px 14px 4px; }
     .ficha p { margin: 0 14px 14px; }
@@ -71,6 +72,7 @@
     Soluciones Carabanchel · Proyecto libre con licencia MIT ·
     <a href="https://github.com/soluciones-carabanchel/soluciones-carabanchel.github.io">GitHub</a>
   </footer>
+  <noscript><style>.caja3d svg { visibility: visible; }</style></noscript>
   <script type="module" src="portada.js"></script>
 </body>
 </html>
